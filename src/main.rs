@@ -57,11 +57,39 @@ impl Game {
         None
     }
 
+    fn draw(&self) -> bool {
+        self.winner().is_none() && self.board.iter().all(|&v| v != 0)
+    }
+
     fn place(&self, index: usize, player: u8) -> Game {
         let mut new = *self;
-
         new.board[index] = player;
         new
+    }
+
+    fn minimax(&self, player: u8) -> i32 {
+        if let Some(w) = self.winner() {
+            return if w == 1 { 1 } else { -1 };
+        }
+
+        if self.draw() {
+            return 0;
+        }
+
+        let mut best = if player == 1 { i32::MIN } else { i32::MAX };
+
+        for index in self.empty() {
+            let next = self.place(index, player);
+            let score = next.minimax(if player == 1 { 2 } else { 1 });
+
+            if player == 1 {
+                best = best.max(score);
+            } else {
+                best = best.min(score);
+            }
+        }
+
+        best
     }
 }
 
